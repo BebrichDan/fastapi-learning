@@ -8,12 +8,14 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
+SQL_LITE = "sqlite+aiosqlite:///mydb.db"
+POSTGRE_SQL = "postgresql+asyncpg://myuser:mypassword@localhost/mydb"
+
+
 app = FastAPI()
 
-# engine = create_async_engine("sqlite+aiosqlite:///mydb.db", echo=True)
-
 engine = create_async_engine(
-    "postgresql+asyncpg://myuser:mypassword@localhost/mydb",
+    POSTGRE_SQL,
     echo=True
 )
 
@@ -24,12 +26,11 @@ async def get_session():
     async with new_async_session() as session:
         yield session
 
-
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
+
 
 class Base(DeclarativeBase):
     pass
-
 
 class BookModel(Base):
     __tablename__ = "books"
@@ -66,7 +67,6 @@ async def add_book(book: BookSchema, session: SessionDep) -> BookSchema:
     session.add(new_book)
     await session.commit()
     return book
-
 
 @app.get("/books")
 async def get_books(session: SessionDep) -> list[BookGetSchema]:

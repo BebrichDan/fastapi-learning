@@ -74,7 +74,6 @@ def create_book(new_book: BookSchema):
     }
 
 
-# нужно поправить логику передачи null
 @app.put(
     "/books/{book_id}",
     response_model=ResponseSchema,
